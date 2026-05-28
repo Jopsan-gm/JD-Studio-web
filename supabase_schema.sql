@@ -7,7 +7,8 @@ create table products (
   description text,
   category text,
   images text[],
-  is_sold_out boolean default false
+  is_sold_out boolean default false,
+  discount_price numeric
 );
 
 -- Enable Row Level Security (RLS)

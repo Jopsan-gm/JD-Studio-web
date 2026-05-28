@@ -16,6 +16,8 @@ export default function AdminPage() {
     const [uploading, setUploading] = useState(false);
     const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | null }>({ message: '', type: null });
     const [showConfirm, setShowConfirm] = useState<{ show: boolean; message: string; onConfirm: () => void } | null>(null);
+    const [discountModal, setDiscountModal] = useState<{ show: boolean; productId: string; currentPrice: number } | null>(null);
+    const [discountInputValue, setDiscountInputValue] = useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const showToast = (message: string, type: 'success' | 'error') => {
@@ -28,7 +30,7 @@ export default function AdminPage() {
         name: '',
         price: '',
         description: '',
-        category: 'T-Shirts',
+        category: 'Prendas',
         images: '',
         discountPrice: '',
     });
@@ -117,7 +119,7 @@ export default function AdminPage() {
             if (error) throw error;
 
             showToast('Producto creado con éxito!', 'success');
-            setFormData({ name: '', price: '', description: '', category: 'T-Shirts', images: '', discountPrice: '' });
+            setFormData({ name: '', price: '', description: '', category: 'Prendas', images: '', discountPrice: '' });
             fetchProducts();
         } catch (error: any) {
             showToast('Error al crear producto: ' + error.message, 'error');
@@ -169,11 +171,15 @@ export default function AdminPage() {
         }
     };
 
-    const handleApplyDiscount = async (id: string, currentPrice: number) => {
-        const discountInput = prompt('Ingresa el NUEVO PRECIO con descuento (₡):', '');
-        if (discountInput === null) return;
+    const handleApplyDiscount = (id: string, currentPrice: number) => {
+        setDiscountModal({ show: true, productId: id, currentPrice });
+        setDiscountInputValue('');
+    };
 
-        const newPrice = parseFloat(discountInput);
+    const confirmApplyDiscount = async () => {
+        if (!discountModal) return;
+
+        const newPrice = parseFloat(discountInputValue);
         if (isNaN(newPrice)) {
             showToast('Precio no válido', 'error');
             return;
@@ -184,11 +190,12 @@ export default function AdminPage() {
             const { error } = await supabase
                 .from('products')
                 .update({ discount_price: newPrice })
-                .eq('id', id);
+                .eq('id', discountModal.productId);
 
             if (error) throw error;
             fetchProducts();
             showToast('Descuento aplicado', 'success');
+            setDiscountModal(null);
         } catch (error: any) {
             showToast('Error al aplicar descuento: ' + error.message, 'error');
         } finally {
@@ -258,11 +265,11 @@ export default function AdminPage() {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-start bg-gray-50 p-4 pt-16 sm:pt-24">
-                <div className="w-full max-w-sm flex flex-col items-center mb-2">
+                <div className="w-full max-w-sm flex flex-col items-center mb-4">
                     <img
-                        src="/images/Golden-Haze-VTG-removebg-preview.png"
-                        alt="Golden Haze Logo"
-                        className="h-48 md:h-56 w-auto drop-shadow-2xl"
+                        src="/images/jd-logo.png"
+                        alt="JD Studio Logo"
+                        className="h-32 sm:h-40 w-auto object-contain select-none filter invert brightness-0"
                     />
                 </div>
                 <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm relative border border-gray-100">
@@ -272,7 +279,7 @@ export default function AdminPage() {
                     >
                         ← <span className="hidden sm:inline">Volver</span>
                     </Link>
-                    <h2 className="text-2xl font-serif font-bold mb-6 text-center text-gray-800">Acceso Admin</h2>
+                    <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 uppercase tracking-tight">Acceso Admin</h2>
                     <form onSubmit={handleLogin} className="space-y-4">
                         <input
                             type="password"
@@ -295,7 +302,7 @@ export default function AdminPage() {
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Mobile Header */}
             <div className="bg-white shadow-sm sticky top-0 z-30 px-6 py-4 flex justify-between items-center">
-                <h1 className="text-xl font-serif font-bold text-slate-900">Panel Admin v2.0</h1>
+                <h1 className="text-xl font-bold text-slate-900 uppercase tracking-widest">Panel Admin v2.0</h1>
                 <button onClick={() => setIsAuthenticated(false)} className="text-xs font-bold uppercase tracking-widest text-red-500">
                     Salir
                 </button>
@@ -369,13 +376,17 @@ export default function AdminPage() {
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Categoría</label>
                                 <select
                                     value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                    className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium text-gray-600 appearance-none"
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                                    className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium text-gray-600 appearance-none bg-no-repeat"
                                 >
-                                    <option value="T-Shirts">Camisetas</option>
-                                    <option value="Pants">Pantalones</option>
-                                    <option value="Jackets">Chaquetas</option>
-                                    <option value="Accessories">Accesorios</option>
+                                    <option value="Prendas">Prendas (Ropa)</option>
+                                    <option value="T-Shirts">T-Shirts (Ropa)</option>
+                                    <option value="Pants">Pants (Ropa)</option>
+                                    <option value="Jackets">Jackets (Ropa)</option>
+                                    <option value="Collares">Collares (Bisutería)</option>
+                                    <option value="Aretes">Aretes (Bisutería)</option>
+                                    <option value="Pulseras">Pulseras (Bisutería)</option>
+                                    <option value="Anillos">Anillos (Bisutería)</option>
                                 </select>
                             </div>
                         </div>
@@ -557,6 +568,57 @@ export default function AdminPage() {
                             >
                                 Aceptar
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Discount Modal */}
+            {discountModal?.show && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform animate-scale-in border border-gray-100">
+                        <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto">
+                            🏷️
+                        </div>
+                        <h3 className="text-2xl font-serif font-bold text-gray-900 mb-2 text-center">Aplicar Descuento</h3>
+                        <p className="text-gray-500 mb-8 text-center text-sm">
+                            El precio actual es <span className="font-bold text-gray-800 text-base block mt-1">₡{discountModal.currentPrice.toLocaleString()}</span>
+                        </p>
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">
+                                    Nuevo Precio en Oferta
+                                </label>
+                                <div className="relative group">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-500 font-bold text-xl group-focus-within:scale-110 transition-transform">₡</span>
+                                    <input
+                                        autoFocus
+                                        type="number"
+                                        value={discountInputValue}
+                                        onChange={(e) => setDiscountInputValue(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && confirmApplyDiscount()}
+                                        placeholder="0"
+                                        className="w-full bg-orange-50/50 border-2 border-orange-100 focus:border-orange-500 focus:bg-white p-4 pl-10 rounded-2xl outline-none transition-all font-bold text-2xl text-orange-700 placeholder:text-orange-200"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setDiscountModal(null)}
+                                    className="flex-1 py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold hover:bg-gray-100 hover:text-gray-600 active:scale-95 transition-all text-sm uppercase tracking-widest"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={confirmApplyDiscount}
+                                    disabled={loading || !discountInputValue}
+                                    className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-bold shadow-[0_8px_20px_rgba(234,88,12,0.3)] hover:bg-orange-700 active:scale-95 transition-all text-sm uppercase tracking-widest disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    {loading ? 'Aplicando...' : 'Confirmar'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,12 +1,12 @@
 import { Product } from "@/types/product";
 
-const PHONE_NUMBER = "50672795250";
+const PHONE_NUMBER = "50686360118";
 
 export const getWhatsAppLink = (product: Product) => {
-    const message = `Hola Golden haze Vtg! Me interesa este producto:
+    const message = `Hola JD Studio! Me interesa este producto:
   
 *${product.name}*
-Precio: ₡${product.price}
+Precio: ₡${(product.discount_price || product.price).toLocaleString()}
 ${typeof window !== 'undefined' ? `Catálogo: ${window.location.href}` : ''}
 
 ¿Sigue disponible?`;

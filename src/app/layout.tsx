@@ -13,8 +13,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-    title: "Golden haze Vtg | Vintage & Curated Store",
-    description: "Descubre prendas únicas con historia. Golden haze Vtg, moda sostenible y vintage.",
+    title: "JD Studio | Boutique de Ropa & Bisutería Fina",
+    description: "Curaduría exclusiva de ropa sofisticada y piezas de bisutería de alta gama en Costa Rica. Eleva tu estilo con JD Studio.",
 };
 
 export default function RootLayout({

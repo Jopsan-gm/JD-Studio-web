@@ -190,10 +190,10 @@ export default function ProductDetail() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <span className="text-vintage-gold text-xs font-bold uppercase tracking-[0.2em] mb-2 block">
+                        <span className="text-gray-500 text-xs font-bold uppercase tracking-[0.2em] mb-2 block">
                             {product.category}
                         </span>
-                        <h1 className="text-3xl font-serif text-gray-900 leading-tight mb-4">
+                        <h1 className="text-3xl !font-sans font-bold text-gray-900 leading-tight mb-4 uppercase tracking-wider">
                             {product.name}
                         </h1>
                         <div className="text-3xl font-bold text-gray-900">
@@ -208,8 +208,8 @@ export default function ProductDetail() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
                     >
-                        <h3 className="font-bold text-sm uppercase tracking-widest text-gray-800 mb-3">Descripción</h3>
-                        <p className="text-gray-600 leading-loose">
+                        <h3 className="font-sans font-bold text-sm uppercase tracking-widest text-gray-800 mb-3">Descripción</h3>
+                        <p className="font-sans text-gray-600 leading-loose">
                             {product.description}
                         </p>
                     </motion.div>

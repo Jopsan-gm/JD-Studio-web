@@ -2,86 +2,92 @@ import { Product } from "@/types/product";
 
 export const products: Product[] = [
     {
-        id: "7",
-        name: "Suéter Vintage Oversized",
-        price: 8000,
-        description: "Suéter vintage de alta calidad, tejido suave y corte relajado. Una pieza única cargada de historia.",
-        category: "Jackets",
-        images: [
-            "/images/sueter.jpg",
-            "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=2070",
-        ],
-    },
-    {
         id: "1",
-        name: "Pantalón Carhartt Carpenter",
-        price: 8000,
-        description: "Pantalón Carhartt original, corte carpenter resistente. Ideal para un estilo urbano y duradero.",
-        category: "Pants",
+        name: "Vestido de Lino Verona",
+        price: 24500,
+        description: "Vestido midi confeccionado en lino 100% orgánico. Silueta fluida, tirantes delicados y espalda escotada. Ideal para días frescos y elegantes.",
+        category: "Prendas",
         images: [
-            "/images/panta-carhart.jpg",
-            "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=2070",
-            "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=2052"
+            "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=2070",
+            "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2073"
         ],
     },
     {
         id: "2",
-        name: "DICKIES EISENHOWER UNLINED WORKJACKET",
-        price: 8000,
-        description: "Chaqueta de trabajo clásica, ligera y duradera. Perfecta para capas en cualquier clima.",
-        category: "Jackets",
+        name: "Collar Eslabones Chapa de Oro 18k",
+        price: 16500,
+        description: "Collar de eslabones medianos con acabado pulido, bañado en oro de 18 quilates. Una pieza atemporal, sofisticada y versátil para elevar cualquier look.",
+        category: "Collares",
         images: [
-            "https://images.unsplash.com/photo-1591047139829-d91aec16adbd?q=80&w=2070",
-            "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=2070",
-            "https://images.unsplash.com/photo-1441984904996-e0b6ba687e12?q=80&w=2070"
+            "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=2070",
+            "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=2070"
         ],
     },
     {
         id: "3",
-        name: "CARHARTT WIP PURPLE CAMO JACKET",
-        price: 8000,
-        description: "Chaqueta Carhartt con estampado camo púrpura exclusivo. Pieza de colección con detalles industriales.",
-        category: "Jackets",
+        name: "Blusa Rib Seda Salvaje",
+        price: 18000,
+        description: "Blusa acanalada confeccionada en una mezcla premium de seda salvaje y algodón. Tacto ultrasuave, ajuste al cuerpo elegante y cuello mao sutil.",
+        category: "Prendas",
         images: [
-            "https://images.unsplash.com/photo-1544923246-77307dd654ca?q=80&w=2069",
-            "https://images.unsplash.com/photo-1604176354204-926873ff324c?q=80&w=2080",
-            "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=2070"
+            "https://images.unsplash.com/photo-1548624149-f7b3156c2199?q=80&w=2070",
+            "https://images.unsplash.com/photo-1591047139829-d91aec16adbd?q=80&w=2070"
         ],
     },
     {
         id: "4",
-        name: "TSHIRT S/S INCOGNITO - VINTAGE BLACK",
-        price: 8000,
-        description: "Camiseta de algodón premium con lavado vintage para ese look desgastado auténtico.",
-        category: "T-Shirts",
+        name: "Aretes Aro Texturizado en Oro",
+        price: 12000,
+        description: "Aretes de aro mediano con una textura martillada única inspirada en el diseño orgánico. Bañados en oro mate de 18k, muy ligeros y elegantes.",
+        category: "Aretes",
         images: [
-            "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=2070",
-            "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=2070",
-            "https://images.unsplash.com/photo-1562157873-818bc0726f68?q=80&w=2070"
+            "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=2070",
+            "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=2070"
         ],
     },
     {
         id: "5",
-        name: "CARHARTT WIP STRIPED SHIRT",
-        price: 8000,
-        description: "Camisa de rayas con logo bordado. Tela de alta calidad y corte relajado.",
-        category: "T-Shirts",
+        name: "Anillo Hojas de Olivo en Plata Ley 925",
+        price: 14000,
+        description: "Anillo delicado con diseño de hojas de olivo talladas a mano. Confeccionado en Plata de Ley 925 con un acabado brillante. Ajustable.",
+        category: "Anillos",
         images: [
-            "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2066",
-            "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=2072",
-            "https://images.unsplash.com/photo-1589310243389-96a5483213a8?q=80&w=2070"
+            "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=2070",
+            "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=2070"
         ],
     },
     {
         id: "6",
-        name: "VINTAGE LEVIS 501 - LIGHT BLUE",
-        price: 8000,
-        description: "Jeans Levis 501 originales, lavado claro. El clásico de clásicos que nunca pasa de moda.",
-        category: "Pants",
+        name: "Pulsera Eslabón Enlazado",
+        price: 15500,
+        description: "Pulsera de cadena fina enlazada con diseño contemporáneo. Cierre marinero seguro y baño en oro de alta resistencia. Perfecta para combinar.",
+        category: "Pulseras",
         images: [
-            "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=2052",
-            "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=2070",
-            "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?q=80&w=2070"
+            "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=2070",
+            "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?q=80&w=2070"
+        ],
+        discount_price: 12500
+    },
+    {
+        id: "7",
+        name: "Vestido Satinado Seda Nocturna",
+        price: 28000,
+        description: "Vestido largo de corte al bies confeccionado en satén de seda fluida. Tirantes cruzados ajustables en la espalda y caída espectacular.",
+        category: "Prendas",
+        images: [
+            "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2073",
+            "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=2070"
         ],
     },
+    {
+        id: "8",
+        name: "Aretes Colgantes Perlas Naturales",
+        price: 14500,
+        description: "Aretes sofisticados con base geométrica bañada en oro y perla barroca de agua dulce colgante. Cada perla es única y natural.",
+        category: "Aretes",
+        images: [
+            "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=2070",
+            "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=2070"
+        ],
+    }
 ];

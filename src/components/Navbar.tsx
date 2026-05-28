@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, X, Trash2 } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
@@ -9,30 +9,51 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const { cart, removeFromCart } = useCart();
 
     const toggleMenu = () => setIsOpen(!isOpen);
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 20) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     const total = cart.reduce((acc, item) => acc + (item.discount_price || item.price), 0);
 
     return (
         <>
-            <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 pointer-events-none">
-                <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-4 md:py-6 flex justify-between items-center bg-transparent pointer-events-auto">
+            <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 pointer-events-none ${
+                isScrolled ? 'bg-black/90 backdrop-blur-md border-b border-white/5 py-2 md:py-3' : 'bg-transparent py-4 md:py-6'
+            }`}>
+                <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex justify-between items-center pointer-events-auto">
                     {/* Logo Area */}
                     <div className="pointer-events-auto">
                         <Link href="/" className="block">
                             <img
-                                src="/images/Golden-Haze-VTG-removebg-preview.png"
-                                alt="Golden Haze Vtg Logo"
-                                className="h-16 md:h-26 w-auto drop-shadow-2xl transition-transform hover:scale-105 active:scale-95"
+                                src="/images/jd-logo.png"
+                                alt="JD Studio Logo"
+                                className="h-24 md:h-36 w-auto object-contain transition-transform hover:scale-105 active:scale-95 filter brightness-125"
                             />
                         </Link>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex items-center gap-3 pointer-events-auto">
+                        {/* Location Pill */}
+                        <div className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold tracking-widest text-gray-300 uppercase select-none">
+                            <span>Turrialba, Cartago</span>
+                            <span className="text-xs">🇨🇷</span>
+                        </div>
+
                         {/* Cart Button */}
                         <button
                             onClick={toggleCart}
@@ -40,7 +61,7 @@ const Navbar = () => {
                         >
                             <ShoppingBag className="w-5 h-5" />
                             {cart.length > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-vintage-gold text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                                <span className="absolute -top-1 -right-1 bg-white text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
                                     {cart.length}
                                 </span>
                             )}
@@ -210,8 +231,8 @@ const Navbar = () => {
                     </nav>
 
                     <div className="mt-auto">
-                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Golden Haze Vintage</p>
-                        <p className="text-xs text-gray-400 mt-1">Costa Rica, 2024</p>
+                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">JD Studio</p>
+                        <p className="text-xs text-gray-400 mt-1">Costa Rica, 2026</p>
                     </div>
                 </div>
             </aside>

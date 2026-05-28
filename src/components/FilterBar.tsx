@@ -15,12 +15,12 @@ const FilterBar = ({ categories, activeCategory, onCategoryChange }: FilterBarPr
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="bg-white p-2 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-wrap justify-center gap-2"
+                className="bg-white p-2 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-wrap justify-center gap-2"
             >
                 <button
                     onClick={() => onCategoryChange('All')}
-                    className={`px-5 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${activeCategory === 'All'
-                        ? 'bg-black text-white border-black shadow-lg shadow-black/10'
+                    className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${activeCategory === 'All'
+                        ? 'bg-[#242424] text-white border-[#242424] shadow-lg shadow-black/10'
                         : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
                         }`}
                 >
@@ -30,16 +30,12 @@ const FilterBar = ({ categories, activeCategory, onCategoryChange }: FilterBarPr
                     <button
                         key={cat}
                         onClick={() => onCategoryChange(cat)}
-                        className={`px-5 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${activeCategory === cat
-                            ? 'bg-black text-white border-black shadow-lg shadow-black/10'
+                        className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${activeCategory === cat
+                            ? 'bg-[#242424] text-white border-[#242424] shadow-lg shadow-black/10'
                             : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
                             }`}
                     >
-                        {cat === 'Jackets' ? 'Chaquetas' :
-                            cat === 'Pants' ? 'Pantalones' :
-                                cat === 'T-Shirts' ? 'Camisetas' :
-                                    cat === 'Accessories' ? 'Accesorios' :
-                                        cat === 'Dresses' ? 'Vestidos' : cat}
+                        {cat}
                     </button>
                 ))}
             </motion.div>

@@ -22,7 +22,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             viewport={{ once: true }}
             whileHover={{ y: -5 }}
             transition={{ duration: 0.5 }}
-            className="group bg-white overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 rounded-sm block"
+            className="group bg-white overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 rounded-2xl block"
         >
             {/* Image Container */}
             <div className="relative aspect-square overflow-hidden bg-gray-50">
@@ -89,7 +89,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                             </span>
                         </div>
                     ) : (
-                        <div className="text-vintage-gold font-bold text-lg leading-none">
+                        <div className="text-slate-800 font-bold text-lg leading-none">
                             ₡{product.price.toLocaleString()}
                         </div>
                     )}
@@ -99,8 +99,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </div>
 
                 <motion.div
-                    whileHover={{ backgroundColor: '#582F0E' }}
-                    className="mt-3 w-full flex items-center justify-center gap-2 py-2 bg-black text-white transition-colors text-xs font-bold uppercase tracking-wider rounded-sm"
+                    whileHover={{ backgroundColor: '#5A5A5A' }}
+                    className="mt-3 w-full flex items-center justify-center gap-2 py-2 bg-black text-white transition-colors text-xs font-bold uppercase tracking-wider rounded-full"
                 >
                     <MessageCircle className="w-4 h-4" />
                     Lo quiero
