@@ -15,13 +15,13 @@ const FilterBar = ({ categories, activeCategory, onCategoryChange }: FilterBarPr
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="bg-white p-2 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-wrap justify-center gap-2"
+                className="bg-zinc-900/60 backdrop-blur-md p-2 rounded-lg border border-zinc-800/80 flex flex-wrap justify-center gap-2 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
             >
                 <button
                     onClick={() => onCategoryChange('All')}
-                    className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${activeCategory === 'All'
-                        ? 'bg-[#242424] text-white border-[#242424] shadow-lg shadow-black/10'
-                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
+                    className={`px-5 py-2.5 rounded-md text-[10px] font-mono uppercase tracking-[0.15em] transition-all duration-300 border ${activeCategory === 'All'
+                        ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_15px_rgba(197,255,48,0.25)]'
+                        : 'bg-zinc-900/40 text-zinc-400 border-zinc-800/60 hover:border-zinc-700 hover:text-white'
                         }`}
                 >
                     Todo
@@ -30,9 +30,9 @@ const FilterBar = ({ categories, activeCategory, onCategoryChange }: FilterBarPr
                     <button
                         key={cat}
                         onClick={() => onCategoryChange(cat)}
-                        className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${activeCategory === cat
-                            ? 'bg-[#242424] text-white border-[#242424] shadow-lg shadow-black/10'
-                            : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
+                        className={`px-5 py-2.5 rounded-md text-[10px] font-mono uppercase tracking-[0.15em] transition-all duration-300 border ${activeCategory === cat
+                            ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_15px_rgba(197,255,48,0.25)]'
+                            : 'bg-zinc-900/40 text-zinc-400 border-zinc-800/60 hover:border-zinc-700 hover:text-white'
                             }`}
                     >
                         {cat}

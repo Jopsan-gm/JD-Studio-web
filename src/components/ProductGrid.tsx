@@ -34,10 +34,13 @@ const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-20 text-center"
+                className="py-24 text-center px-4"
             >
-                <p className="text-vintage-brown/60 font-serif text-2xl italic">
-                    No se encontraron tesoros en esta categoría...
+                <p className="text-[#C5FF30] font-mono text-lg uppercase tracking-widest mb-2 font-bold">
+                    // Cero resultados //
+                </p>
+                <p className="text-zinc-500 font-sans text-xs uppercase tracking-widest max-w-md mx-auto">
+                    No encontramos prendas en esta categoría por ahora. Atento a los nuevos drops.
                 </p>
             </motion.div>
         );

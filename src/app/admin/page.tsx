@@ -30,7 +30,7 @@ export default function AdminPage() {
         name: '',
         price: '',
         description: '',
-        category: 'Prendas',
+        category: 'Oversize',
         images: '',
         discountPrice: '',
     });
@@ -119,7 +119,7 @@ export default function AdminPage() {
             if (error) throw error;
 
             showToast('Producto creado con éxito!', 'success');
-            setFormData({ name: '', price: '', description: '', category: 'Prendas', images: '', discountPrice: '' });
+            setFormData({ name: '', price: '', description: '', category: 'Oversize', images: '', discountPrice: '' });
             fetchProducts();
         } catch (error: any) {
             showToast('Error al crear producto: ' + error.message, 'error');
@@ -379,14 +379,15 @@ export default function AdminPage() {
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
                                     className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium text-gray-600 appearance-none bg-no-repeat"
                                 >
-                                    <option value="Prendas">Prendas (Ropa)</option>
+                                    <option value="Oversize">Oversize (Ropa)</option>
                                     <option value="T-Shirts">T-Shirts (Ropa)</option>
                                     <option value="Pants">Pants (Ropa)</option>
-                                    <option value="Jackets">Jackets (Ropa)</option>
+                                    <option value="Hoodies">Hoodies (Ropa)</option>
                                     <option value="Collares">Collares (Bisutería)</option>
                                     <option value="Aretes">Aretes (Bisutería)</option>
                                     <option value="Pulseras">Pulseras (Bisutería)</option>
                                     <option value="Anillos">Anillos (Bisutería)</option>
+                                    <option value="Van Cleef">Van Cleef (Bisutería)</option>
                                 </select>
                             </div>
                         </div>

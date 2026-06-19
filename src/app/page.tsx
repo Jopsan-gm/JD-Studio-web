@@ -26,11 +26,19 @@ export default function Home() {
             if (error) {
                 console.error('Error fetching products:', error);
             } else {
-                // Map 'Vestidos' database records to 'Prendas' to consolidate all clothing
-                const mappedData = (data || []).map((p: any) => ({
-                    ...p,
-                    category: p.category === 'Vestidos' ? 'Prendas' : p.category
-                }));
+                // Map 'Vestidos' and 'Prendas' records to 'Oversize', and 'Jackets' to 'Hoodies'
+                const mappedData = (data || []).map((p: any) => {
+                    let cat = p.category;
+                    if (cat === 'Vestidos' || cat === 'Prendas') {
+                        cat = 'Oversize';
+                    } else if (cat === 'Jackets') {
+                        cat = 'Hoodies';
+                    }
+                    return {
+                        ...p,
+                        category: cat
+                    };
+                });
                 setProducts(mappedData);
             }
             setLoading(false);
@@ -44,8 +52,8 @@ export default function Home() {
         new Set(products.map((p) => p.category))
     ) as Category[];
 
-    const joyeriaCategories: Category[] = ['Collares', 'Aretes', 'Pulseras', 'Anillos'];
-    const baseRopaCategories: Category[] = ['Prendas', 'T-Shirts', 'Pants', 'Jackets'];
+    const joyeriaCategories: Category[] = ['Collares', 'Aretes', 'Pulseras', 'Anillos', 'Van Cleef'];
+    const baseRopaCategories: Category[] = ['Oversize', 'T-Shirts', 'Pants', 'Hoodies'];
     const ropaCategories: Category[] = Array.from(
         new Set([
             ...baseRopaCategories,
@@ -64,7 +72,17 @@ export default function Home() {
     const filteredProducts = products.filter((p) => {
         if (activeMainTab === 'Ropa' && !ropaCategories.includes(p.category)) return false;
         if (activeMainTab === 'Joyeria' && !joyeriaCategories.includes(p.category)) return false;
-        if (activeCategory !== 'All' && p.category !== activeCategory) return false;
+        
+        if (activeCategory !== 'All') {
+            if (activeCategory === 'Van Cleef') {
+                const nameMatch = p.name.toLowerCase().includes('van cleef');
+                const descMatch = p.description?.toLowerCase().includes('van cleef') || false;
+                const categoryMatch = p.category === 'Van Cleef';
+                if (!nameMatch && !descMatch && !categoryMatch) return false;
+            } else {
+                if (p.category !== activeCategory) return false;
+            }
+        }
         return true;
     });
 
@@ -84,62 +102,78 @@ export default function Home() {
                 <Hero onSelectCollection={handleSelectCollection} />
             </div>
 
-            {showCatalog && (
-                <section id="catalogo-section" className="bg-[#ECEBE9] relative z-20 -mt-16 md:-mt-24 rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] py-12 border-t border-white/10">
-                    <div className="max-w-7xl mx-auto">
-                        {/* Custom Tab Selector */}
-                        <div className="flex justify-center gap-3 mb-6">
-                            <button
-                                onClick={() => {
-                                    setActiveMainTab('Ropa');
-                                    setActiveCategory('All');
-                                }}
-                                className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${
-                                    activeMainTab === 'Ropa'
-                                        ? 'bg-[#242424] text-white border-[#242424]'
-                                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
-                                }`}
-                            >
-                                Ropa
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveMainTab('Joyeria');
-                                    setActiveCategory('All');
-                                }}
-                                className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${
-                                    activeMainTab === 'Joyeria'
-                                        ? 'bg-[#242424] text-white border-[#242424]'
-                                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
-                                }`}
-                            >
-                                Joyería
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveMainTab('All');
-                                    setActiveCategory('All');
-                                }}
-                                className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${
-                                    activeMainTab === 'All'
-                                        ? 'bg-[#242424] text-white border-[#242424]'
-                                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
-                                }`}
-                            >
-                                Ver Todo
-                            </button>
+            <section
+                id="catalogo-section"
+                className={`bg-[#0A0A0C] relative z-20 -mt-16 md:-mt-24 rounded-t-[40px] shadow-[0_-15px_40px_rgba(0,0,0,0.5)] border-t border-[#C5FF30]/10 overflow-hidden ${
+                    showCatalog ? 'py-12 block' : 'hidden'
+                }`}
+            >
+                {showCatalog && (
+                    <>
+                        {/* Background Watermark Logo */}
+                        <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+                            <img
+                                src="/images/jd-logo.png"
+                                alt="JD Studio Background Watermark"
+                                className="w-[90%] max-w-[850px] h-auto object-contain select-none opacity-[0.06] scale-[0.95]"
+                            />
                         </div>
-                        
-                        <FilterBar
-                            categories={visibleCategories}
-                            activeCategory={activeCategory}
-                            onCategoryChange={setActiveCategory}
-                        />
 
-                        <ProductGrid products={filteredProducts} isLoading={loading} />
-                    </div>
-                </section>
-            )}
+                        <div className="max-w-7xl mx-auto relative z-10">
+                            {/* Custom Tab Selector */}
+                            <div className="flex justify-center gap-3 mb-6">
+                                <button
+                                    onClick={() => {
+                                        setActiveMainTab('Ropa');
+                                        setActiveCategory('All');
+                                    }}
+                                    className={`px-6 py-3 rounded-lg text-[10px] uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                        activeMainTab === 'Ropa'
+                                            ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
+                                            : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
+                                    }`}
+                                >
+                                    Ropa
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setActiveMainTab('Joyeria');
+                                        setActiveCategory('All');
+                                    }}
+                                    className={`px-6 py-3 rounded-lg text-[10px] uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                        activeMainTab === 'Joyeria'
+                                            ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
+                                            : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
+                                    }`}
+                                >
+                                    Joyería
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setActiveMainTab('All');
+                                        setActiveCategory('All');
+                                    }}
+                                    className={`px-6 py-3 rounded-lg text-[10px] uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                        activeMainTab === 'All'
+                                            ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
+                                            : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
+                                    }`}
+                                >
+                                    Ver Todo
+                                </button>
+                            </div>
+                            
+                            <FilterBar
+                                categories={visibleCategories}
+                                activeCategory={activeCategory}
+                                onCategoryChange={setActiveCategory}
+                            />
+
+                            <ProductGrid products={filteredProducts} isLoading={loading} />
+                        </div>
+                    </>
+                )}
+            </section>
 
             <Footer />
         </main>

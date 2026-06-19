@@ -6,7 +6,7 @@ export const products: Product[] = [
         name: "Vestido de Lino Verona",
         price: 24500,
         description: "Vestido midi confeccionado en lino 100% orgánico. Silueta fluida, tirantes delicados y espalda escotada. Ideal para días frescos y elegantes.",
-        category: "Prendas",
+        category: "Oversize",
         images: [
             "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=2070",
             "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2073"
@@ -28,7 +28,7 @@ export const products: Product[] = [
         name: "Blusa Rib Seda Salvaje",
         price: 18000,
         description: "Blusa acanalada confeccionada en una mezcla premium de seda salvaje y algodón. Tacto ultrasuave, ajuste al cuerpo elegante y cuello mao sutil.",
-        category: "Prendas",
+        category: "Oversize",
         images: [
             "https://images.unsplash.com/photo-1548624149-f7b3156c2199?q=80&w=2070",
             "https://images.unsplash.com/photo-1591047139829-d91aec16adbd?q=80&w=2070"
@@ -73,7 +73,7 @@ export const products: Product[] = [
         name: "Vestido Satinado Seda Nocturna",
         price: 28000,
         description: "Vestido largo de corte al bies confeccionado en satén de seda fluida. Tirantes cruzados ajustables en la espalda y caída espectacular.",
-        category: "Prendas",
+        category: "Oversize",
         images: [
             "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2073",
             "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=2070"
