@@ -20,7 +20,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className="group bg-[#121215] border border-zinc-900/80 hover:border-[#C5FF30]/40 transition-all duration-300 rounded-xl block hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] hover:-translate-y-1 overflow-hidden"
         >
             {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden bg-zinc-950">
+            <div className="relative aspect-[4/5] overflow-hidden bg-zinc-950">
                 <img
                     src={product.images[0]}
                     alt={product.name}
@@ -66,7 +66,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <div className="p-4 flex flex-col justify-between min-h-[168px]">
                 <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                        <span className="text-[9px] text-[#C5FF30] font-mono uppercase tracking-[0.2em] font-bold">
+                        <span className="text-[9px] md:text-xs text-[#C5FF30] font-mono uppercase tracking-[0.2em] font-bold">
                             {product.category}
                         </span>
                         <button
@@ -90,7 +90,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                             />
                         </button>
                     </div>
-                    <h3 className="text-sm font-sans font-bold text-zinc-100 group-hover:text-[#C5FF30] line-clamp-2 leading-snug transition-colors duration-300 min-h-[2.5rem]">
+                    <h3 className="text-sm md:text-base font-sans font-bold text-zinc-100 group-hover:text-[#C5FF30] line-clamp-2 leading-snug transition-colors duration-300 min-h-[2.5rem]">
                         {product.name}
                     </h3>
                 </div>
@@ -113,7 +113,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         )}
                     </div>
                     <div
-                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#C5FF30] text-black hover:bg-[#b5eb29] transition-all duration-300 text-xs font-black uppercase tracking-widest rounded-lg shadow-lg shadow-[#C5FF30]/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#C5FF30] text-black hover:bg-[#b5eb29] transition-all duration-300 text-xs font-black uppercase tracking-widest rounded-lg shadow-lg shadow-[#C5FF30]/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98] md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0"
                     >
                         <MessageCircle className="w-4 h-4 stroke-[3]" />
                         Lo quiero

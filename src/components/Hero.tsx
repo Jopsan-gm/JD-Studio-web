@@ -37,7 +37,7 @@ const Hero = ({ onSelectCollection }: HeroProps) => {
                     <img
                         src="/images/jd-logo.png"
                         alt="JD Studio Logo"
-                        className="h-60 md:h-[340px] w-auto object-contain filter drop-shadow-[0_12px_36px_rgba(255,255,255,0.25)] brightness-125"
+                        className="h-60 md:h-[260px] lg:h-[280px] w-auto object-contain filter drop-shadow-[0_12px_36px_rgba(255,255,255,0.25)] brightness-125"
                     />
                 </motion.div>
 

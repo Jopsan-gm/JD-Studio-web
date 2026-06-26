@@ -127,7 +127,7 @@ export default function Home() {
                                         setActiveMainTab('Ropa');
                                         setActiveCategory('All');
                                     }}
-                                    className={`px-6 py-3 rounded-lg text-[10px] uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                    className={`px-6 py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
                                         activeMainTab === 'Ropa'
                                             ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
                                             : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
@@ -140,7 +140,7 @@ export default function Home() {
                                         setActiveMainTab('Joyeria');
                                         setActiveCategory('All');
                                     }}
-                                    className={`px-6 py-3 rounded-lg text-[10px] uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                    className={`px-6 py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
                                         activeMainTab === 'Joyeria'
                                             ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
                                             : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
@@ -153,7 +153,7 @@ export default function Home() {
                                         setActiveMainTab('All');
                                         setActiveCategory('All');
                                     }}
-                                    className={`px-6 py-3 rounded-lg text-[10px] uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                    className={`px-6 py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
                                         activeMainTab === 'All'
                                             ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
                                             : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
