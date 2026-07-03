@@ -296,7 +296,9 @@ const Navbar = () => {
                                             <li>
                                                 <strong className="text-gray-300">SINPE Móvil:</strong> Pago inmediato al número <span className="text-[#C5FF30] font-bold font-mono">+506 8636 0118</span>.
                                             </li>
-
+                                            <li>
+                                                <strong className="text-gray-300">Pagos en Efectivo:</strong> Aceptamos pagos en efectivo, exclusivo para entregas personales.
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
