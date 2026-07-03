@@ -34,7 +34,7 @@ const Footer = () => {
                     <h3 className="uppercase tracking-[0.2em] text-xs text-vintage-gold font-bold mb-2">Contacto</h3>
                     <p className="text-gray-300 text-sm">Cartago, Costa Rica</p>
                     <p className="text-gray-300 text-sm">+506 8636 0118</p>
-                    <p className="mt-2 text-sm italic font-bold text-vintage-gold">contacto@jdstudio.com</p>
+                    <p className="mt-2 text-sm italic font-bold text-vintage-gold">jdstudio.cr@gmail.com</p>
                 </div>
             </div>
 
