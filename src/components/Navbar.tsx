@@ -296,9 +296,7 @@ const Navbar = () => {
                                             <li>
                                                 <strong className="text-gray-300">SINPE Móvil:</strong> Pago inmediato al número <span className="text-[#C5FF30] font-bold font-mono">+506 8636 0118</span>.
                                             </li>
-                                            <li>
-                                                <strong className="text-gray-300">Transferencias Bancarias:</strong> Disponibles previa coordinación directa.
-                                            </li>
+
                                         </ul>
                                     </div>
                                 </div>
@@ -319,9 +317,7 @@ const Navbar = () => {
                                             <li>
                                                 El costo del envío corre por cuenta del comprador y se coordina al momento de confirmar el pedido.
                                             </li>
-                                            <li>
-                                                Una vez entregado el paquete a Correos, el tiempo de entrega depende del servicio postal — <strong className="text-white font-semibold">JD Studio</strong> no se hace responsable por demoras una vez que el pedido está en tránsito.
-                                            </li>
+
                                             <li>
                                                 Te compartimos el número de rastreo para que puedas seguir tu pedido.
                                             </li>
