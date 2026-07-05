@@ -19,6 +19,13 @@ export default function AdminPage() {
     const [discountModal, setDiscountModal] = useState<{ show: boolean; productId: string; currentPrice: number } | null>(null);
     const [discountInputValue, setDiscountInputValue] = useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [editModal, setEditModal] = useState<{ show: boolean; product: any } | null>(null);
+    const [editFormData, setEditFormData] = useState({
+        name: '',
+        price: '',
+        description: '',
+        category: 'Oversize',
+    });
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setNotification({ message, type });
@@ -221,6 +228,42 @@ export default function AdminPage() {
         }
     };
 
+    const handleEditClick = (product: any) => {
+        setEditModal({ show: true, product });
+        setEditFormData({
+            name: product.name,
+            price: product.price.toString(),
+            description: product.description || '',
+            category: product.category || 'Oversize',
+        });
+    };
+
+    const handleEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editModal) return;
+        setLoading(true);
+        try {
+            const { error } = await supabase
+                .from('products')
+                .update({
+                    name: editFormData.name,
+                    price: parseFloat(editFormData.price),
+                    description: editFormData.description,
+                    category: editFormData.category,
+                })
+                .eq('id', editModal.product.id);
+
+            if (error) throw error;
+            fetchProducts();
+            showToast('Producto actualizado', 'success');
+            setEditModal(null);
+        } catch (error: any) {
+            showToast('Error al actualizar: ' + error.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
 
@@ -387,6 +430,7 @@ export default function AdminPage() {
                                     <option value="Aretes">Aretes (Bisutería)</option>
                                     <option value="Pulseras">Pulseras (Bisutería)</option>
                                     <option value="Anillos">Anillos (Bisutería)</option>
+                                    <option value="Conjuntos">Conjuntos (Bisutería)</option>
                                     <option value="Van Cleef">Van Cleef (Bisutería)</option>
                                 </select>
                             </div>
@@ -523,6 +567,12 @@ export default function AdminPage() {
                                         )}
 
                                         <button
+                                            onClick={() => handleEditClick(product)}
+                                            className="px-3 py-1.5 bg-blue-50 text-blue-500 rounded-md text-xs font-bold"
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
                                             onClick={() => handleDelete(product.id)}
                                             className="px-3 py-1.5 bg-red-50 text-red-500 rounded-md text-xs font-bold"
                                         >
@@ -621,6 +671,81 @@ export default function AdminPage() {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Edit Modal */}
+            {editModal?.show && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform animate-scale-in border border-gray-100 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-gray-900">Editar Producto</h3>
+                            <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600 text-xl font-bold">
+                                ✕
+                            </button>
+                        </div>
+                        <form onSubmit={handleEditSubmit} className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Nombre</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                    className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Precio Original</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-3 text-gray-400 font-bold">₡</span>
+                                    <input
+                                        type="number"
+                                        value={editFormData.price}
+                                        onChange={(e) => setEditFormData({ ...editFormData, price: e.target.value })}
+                                        className="w-full p-3 pl-8 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-bold text-gray-800"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Categoría</label>
+                                <select
+                                    value={editFormData.category}
+                                    onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                                    className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium text-gray-600 appearance-none bg-no-repeat"
+                                >
+                                    <option value="Oversize">Oversize (Ropa)</option>
+                                    <option value="T-Shirts">T-Shirts (Ropa)</option>
+                                    <option value="Pants">Pants (Ropa)</option>
+                                    <option value="Hoodies">Hoodies (Ropa)</option>
+                                    <option value="Collares">Collares (Bisutería)</option>
+                                    <option value="Aretes">Aretes (Bisutería)</option>
+                                    <option value="Pulseras">Pulseras (Bisutería)</option>
+                                    <option value="Anillos">Anillos (Bisutería)</option>
+                                    <option value="Conjuntos">Conjuntos (Bisutería)</option>
+                                    <option value="Van Cleef">Van Cleef (Bisutería)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Descripción</label>
+                                <textarea
+                                    value={editFormData.description}
+                                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                    className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none text-sm text-gray-600"
+                                    rows={3}
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-black active:scale-95 transition-all duration-200 mt-4 text-sm uppercase tracking-widest"
+                                disabled={loading}
+                            >
+                                {loading ? 'Guardando...' : 'Guardar Cambios'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}

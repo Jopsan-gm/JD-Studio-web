@@ -52,7 +52,7 @@ export default function Home() {
         new Set(products.map((p) => p.category))
     ) as Category[];
 
-    const joyeriaCategories: Category[] = ['Collares', 'Aretes', 'Pulseras', 'Anillos', 'Van Cleef'];
+    const joyeriaCategories: Category[] = ['Collares', 'Aretes', 'Pulseras', 'Anillos', 'Conjuntos', 'Van Cleef'];
     const baseRopaCategories: Category[] = ['Oversize', 'T-Shirts', 'Pants', 'Hoodies'];
     const ropaCategories: Category[] = Array.from(
         new Set([
