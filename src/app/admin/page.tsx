@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
-import { products as localProducts } from '@/data/products';
 
 // Simple password protection
 const ADMIN_PASSWORD = "golden-admin-2024";
@@ -26,6 +25,9 @@ export default function AdminPage() {
         description: '',
         category: 'Oversize',
     });
+
+    const [isDropMode, setIsDropMode] = useState(false);
+    const [dropDrafts, setDropDrafts] = useState<any[]>([]);
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setNotification({ message, type });
@@ -63,38 +65,6 @@ export default function AdminPage() {
         }
     }, [isAuthenticated]);
 
-    // Migration function
-    const handleMigration = async () => {
-        setShowConfirm({
-            show: true,
-            message: '¿Estás seguro? Esto copiará los productos del código a la base de datos.',
-            onConfirm: async () => {
-                setShowConfirm(null);
-                setLoading(true);
-                try {
-                    const productsToInsert = localProducts.map(p => ({
-                        name: p.name,
-                        price: p.price,
-                        description: p.description,
-                        category: p.category,
-                        images: p.images,
-                        is_sold_out: false
-                    }));
-
-                    const { error } = await supabase.from('products').insert(productsToInsert);
-                    if (error) throw error;
-
-                    showToast('¡Productos migrados exitosamente!', 'success');
-                    fetchProducts();
-                } catch (error: any) {
-                    showToast('Error en la migración: ' + error.message, 'error');
-                } finally {
-                    setLoading(false);
-                }
-            }
-        });
-    };
-
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         if (password === ADMIN_PASSWORD) {
@@ -106,6 +76,25 @@ export default function AdminPage() {
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isDropMode) {
+            const newDraft = {
+                id: Math.random().toString(36).substr(2, 9),
+                name: formData.name,
+                price: parseFloat(formData.price),
+                description: formData.description,
+                category: formData.category,
+                images: formData.images.split(',').map(url => url.trim()).filter(Boolean),
+                is_sold_out: false,
+                discount_price: formData.discountPrice ? parseFloat(formData.discountPrice) : null
+            };
+            
+            setDropDrafts(prev => [newDraft, ...prev]);
+            showToast('Prenda agregada al Drop', 'success');
+            setFormData({ name: '', price: '', description: '', category: 'Oversize', images: '', discountPrice: '' });
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -133,6 +122,39 @@ export default function AdminPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePublishDrop = async () => {
+        if (dropDrafts.length === 0) return;
+        
+        setLoading(true);
+        try {
+            const productsToInsert = dropDrafts.map(draft => ({
+                name: draft.name,
+                price: draft.price,
+                description: draft.description,
+                category: draft.category,
+                images: draft.images,
+                is_sold_out: draft.is_sold_out,
+                discount_price: draft.discount_price
+            }));
+
+            const { error } = await supabase.from('products').insert(productsToInsert);
+            if (error) throw error;
+
+            showToast('¡Drop publicado con éxito!', 'success');
+            setDropDrafts([]);
+            setIsDropMode(false);
+            fetchProducts();
+        } catch (error: any) {
+            showToast('Error al publicar Drop: ' + error.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleRemoveFromDrop = (idToRemove: string) => {
+        setDropDrafts(prev => prev.filter(draft => draft.id !== idToRemove));
     };
 
     const handleDelete = async (id: string) => {
@@ -352,15 +374,24 @@ export default function AdminPage() {
             </div>
 
             <div className="max-w-2xl mx-auto p-4 space-y-8">
-                {/* Actions Toolbar */}
+                {/* Actions Toolbar - Drop Mode Toggle */}
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between gap-4">
-                    <p className="text-sm text-gray-500 font-medium">Gestión de Catálogo</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-gray-800">Modo Drop</p>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${isDropMode ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
+                            {isDropMode ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </div>
                     <button
-                        onClick={handleMigration}
-                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200 transition"
+                        onClick={() => setIsDropMode(!isDropMode)}
+                        className={`px-6 py-2.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                            isDropMode 
+                                ? 'bg-black text-white hover:bg-gray-800' 
+                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
                         disabled={loading}
                     >
-                        {loading ? '...' : '↺ Restaurar Backup'}
+                        {isDropMode ? '✕ Cancelar Drop' : '＋ Crear Nuevo Drop'}
                     </button>
                 </div>
 
@@ -498,13 +529,70 @@ export default function AdminPage() {
 
                         <button
                             type="submit"
-                            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-black active:scale-95 transition-all duration-200 mt-4 text-sm uppercase tracking-widest"
+                            className={`w-full py-4 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all duration-200 mt-4 text-sm uppercase tracking-widest ${
+                                isDropMode ? 'bg-orange-600 hover:bg-orange-700' : 'bg-slate-900 hover:bg-black'
+                            }`}
                             disabled={loading}
                         >
-                            {loading ? 'Guardando...' : 'Publicar Prenda'}
+                            {loading ? 'Guardando...' : (isDropMode ? 'Agregar al Drop' : 'Publicar Prenda')}
                         </button>
                     </form>
                 </div>
+
+                {/* Drop Drafts Preview */}
+                {isDropMode && (
+                    <div className="bg-orange-50/50 p-6 rounded-xl border-2 border-orange-100/50">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-orange-900">
+                                <span className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm">📦</span>
+                                Drop Actual ({dropDrafts.length} prendas)
+                            </h2>
+                            {dropDrafts.length > 0 && (
+                                <button
+                                    onClick={handlePublishDrop}
+                                    disabled={loading}
+                                    className="w-full sm:w-auto px-6 py-3 bg-orange-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-orange-700 shadow-md shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {loading ? 'Subiendo...' : '🚀 Subir Drop Completo'}
+                                </button>
+                            )}
+                        </div>
+
+                        {dropDrafts.length === 0 ? (
+                            <div className="text-center py-12 bg-white/50 rounded-xl border border-dashed border-orange-200">
+                                <p className="text-orange-600/60 font-medium">No hay prendas en este Drop todavía.</p>
+                                <p className="text-xs text-orange-600/40 mt-1">Usa el formulario de arriba para agregar prendas.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {dropDrafts.map((draft) => (
+                                    <div key={draft.id} className="bg-white p-4 rounded-xl shadow-sm border border-orange-100 flex gap-4 items-center relative group">
+                                        <div className="w-16 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                            {draft.images && draft.images[0] ? (
+                                                <img src={draft.images[0]} alt={draft.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No img</div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0 pr-6">
+                                            <h3 className="font-bold text-gray-900 truncate text-sm">{draft.name}</h3>
+                                            <p className="text-orange-600 font-bold text-xs mt-1">₡{draft.price.toLocaleString()}</p>
+                                            <p className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider">{draft.category}</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveFromDrop(draft.id)}
+                                            className="absolute top-2 right-2 w-8 h-8 bg-red-50 text-red-500 rounded-lg text-xs font-bold flex items-center justify-center transition-all hover:bg-red-500 hover:text-white"
+                                            title="Quitar del Drop"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Inventory List */}
                 <div>
