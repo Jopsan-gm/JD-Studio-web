@@ -1,5 +1,11 @@
 import React from 'react';
-import { Instagram, Twitter, Facebook } from 'lucide-react';
+import { Instagram, Facebook } from 'lucide-react';
+
+const TiktokIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
+    </svg>
+);
 
 const Footer = () => {
     return (
@@ -23,8 +29,8 @@ const Footer = () => {
                 <div className="flex flex-col items-center justify-center gap-4">
                     <h3 className="uppercase tracking-[0.2em] text-xs text-vintage-gold font-bold mb-2">Síguenos</h3>
                     <div className="flex gap-6 text-gray-300">
-                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-vintage-gold transition-colors"><Instagram /></a>
-                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-vintage-gold transition-colors"><Twitter /></a>
+                        <a href="https://www.instagram.com/jdstudio.cr" target="_blank" rel="noopener noreferrer" className="hover:text-vintage-gold transition-colors"><Instagram /></a>
+                        <a href="https://www.tiktok.com/@jdstudio.cr" target="_blank" rel="noopener noreferrer" className="hover:text-vintage-gold transition-colors"><TiktokIcon /></a>
                         <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-vintage-gold transition-colors"><Facebook /></a>
                     </div>
                 </div>

@@ -10,8 +10,8 @@ import { supabase } from '@/utils/supabase';
 import { Product, Category } from '@/types/product';
 
 export default function Home() {
-    const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
-    const [activeMainTab, setActiveMainTab] = useState<'All' | 'Ropa' | 'Joyeria'>('All');
+    const [activeCategory, setActiveCategory] = useState<string>('All');
+    const [activeMainTab, setActiveMainTab] = useState<'All' | 'Oversize' | 'Vintage' | 'Joyeria'>('All');
     const [showCatalog, setShowCatalog] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -53,32 +53,36 @@ export default function Home() {
     ) as Category[];
 
     const joyeriaCategories: Category[] = ['Collares', 'Aretes', 'Pulseras', 'Anillos', 'Conjuntos', 'Van Cleef'];
-    const baseRopaCategories: Category[] = ['Oversize', 'T-Shirts', 'Pants', 'Hoodies'];
-    const ropaCategories: Category[] = Array.from(
-        new Set([
-            ...baseRopaCategories,
-            ...categories.filter((cat) => !joyeriaCategories.includes(cat))
-        ])
+    const oversizeCategories: string[] = ['Oversize'];
+    
+    // Any clothing category that isn't jewelry and isn't oversize goes into Vintage
+    const vintageCategories: string[] = Array.from(
+        new Set(categories.filter((cat) => !joyeriaCategories.includes(cat) && !oversizeCategories.includes(cat)))
     );
 
-    const getCategoriesForTab = (): Category[] => {
-        if (activeMainTab === 'Ropa') return ropaCategories;
-        if (activeMainTab === 'Joyeria') return joyeriaCategories;
+    const getCategoriesForTab = (): string[] => {
+        if (activeMainTab === 'Oversize') return oversizeCategories;
+        if (activeMainTab === 'Vintage') return vintageCategories;
+        if (activeMainTab === 'Joyeria') return ['Piezas Individuales', 'Sets & Colecciones'];
         return categories;
     };
 
     const visibleCategories = getCategoriesForTab();
 
     const filteredProducts = products.filter((p) => {
-        if (activeMainTab === 'Ropa' && !ropaCategories.includes(p.category)) return false;
+        if (activeMainTab === 'Oversize' && !oversizeCategories.includes(p.category)) return false;
+        if (activeMainTab === 'Vintage' && !vintageCategories.includes(p.category)) return false;
         if (activeMainTab === 'Joyeria' && !joyeriaCategories.includes(p.category)) return false;
         
         if (activeCategory !== 'All') {
-            if (activeCategory === 'Van Cleef') {
+            if (activeCategory === 'Piezas Individuales') {
+                if (!['Collares', 'Aretes', 'Pulseras', 'Anillos'].includes(p.category)) return false;
+            } else if (activeCategory === 'Sets & Colecciones') {
+                // Keep the 'Van Cleef' name check logic for Sets & Colecciones just in case
+                const isSet = ['Van Cleef', 'Conjuntos'].includes(p.category);
                 const nameMatch = p.name.toLowerCase().includes('van cleef');
                 const descMatch = p.description?.toLowerCase().includes('van cleef') || false;
-                const categoryMatch = p.category === 'Van Cleef';
-                if (!nameMatch && !descMatch && !categoryMatch) return false;
+                if (!isSet && !nameMatch && !descMatch) return false;
             } else {
                 if (p.category !== activeCategory) return false;
             }
@@ -87,7 +91,7 @@ export default function Home() {
     });
 
     const handleSelectCollection = (type: 'ropa' | 'joyeria') => {
-        setActiveMainTab(type === 'ropa' ? 'Ropa' : 'Joyeria');
+        setActiveMainTab(type === 'ropa' ? 'Oversize' : 'Joyeria');
         setActiveCategory('All');
         setShowCatalog(true);
         setTimeout(() => {
@@ -121,45 +125,45 @@ export default function Home() {
 
                         <div className="max-w-7xl mx-auto relative z-10">
                             {/* Custom Tab Selector */}
-                            <div className="flex justify-center gap-3 mb-6">
+                            <div className="flex justify-center gap-2 md:gap-3 mb-6 flex-wrap px-2">
                                 <button
                                     onClick={() => {
-                                        setActiveMainTab('Ropa');
+                                        setActiveMainTab('Oversize');
                                         setActiveCategory('All');
                                     }}
-                                    className={`px-6 py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
-                                        activeMainTab === 'Ropa'
+                                    className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono whitespace-nowrap ${
+                                        activeMainTab === 'Oversize'
                                             ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
                                             : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
                                     }`}
                                 >
-                                    Ropa
+                                    Brand New
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setActiveMainTab('Vintage');
+                                        setActiveCategory('All');
+                                    }}
+                                    className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono whitespace-nowrap ${
+                                        activeMainTab === 'Vintage'
+                                            ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
+                                            : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
+                                    }`}
+                                >
+                                    2Hand
                                 </button>
                                 <button
                                     onClick={() => {
                                         setActiveMainTab('Joyeria');
                                         setActiveCategory('All');
                                     }}
-                                    className={`px-6 py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
+                                    className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono whitespace-nowrap ${
                                         activeMainTab === 'Joyeria'
                                             ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
                                             : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
                                     }`}
                                 >
                                     Joyería
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setActiveMainTab('All');
-                                        setActiveCategory('All');
-                                    }}
-                                    className={`px-6 py-3 rounded-lg text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all duration-300 border font-mono ${
-                                        activeMainTab === 'All'
-                                            ? 'bg-[#C5FF30] text-black border-[#C5FF30] font-black shadow-[0_0_20px_rgba(197,255,48,0.2)]'
-                                            : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
-                                    }`}
-                                >
-                                    Ver Todo
                                 </button>
                             </div>
                             
