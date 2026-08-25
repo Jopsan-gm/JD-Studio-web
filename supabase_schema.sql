@@ -26,3 +26,29 @@ create policy "Public profiles are viewable by everyone."
 -- So for now, regular users (anon) can only SELECT.
 
 -- If you entered the Service Role Key in the .env file, the backend will bypass RLS automatically.
+
+-- Create the loyalty_cards table
+create table loyalty_cards (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  first_name text not null,
+  last_name text not null,
+  stamps integer default 0 check (stamps >= 0 and stamps <= 5),
+  unique (first_name, last_name)
+);
+
+-- Enable Row Level Security (RLS)
+alter table loyalty_cards enable row level security;
+
+-- Create policies for public access (select, insert, update)
+create policy "Anyone can register"
+  on loyalty_cards for insert
+  with check ( true );
+
+create policy "Anyone can view their card"
+  on loyalty_cards for select
+  using ( true );
+
+create policy "Anyone can update stamps"
+  on loyalty_cards for update
+  using ( true );

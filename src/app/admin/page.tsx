@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
+import { motion } from 'framer-motion';
 
 // Simple password protection
 const ADMIN_PASSWORD = "golden-admin-2024";
@@ -59,9 +60,83 @@ export default function AdminPage() {
         setLoading(false);
     };
 
+    const [adminTab, setAdminTab] = useState<'products' | 'loyalty'>('products');
+    const [loyaltyCards, setLoyaltyCards] = useState<any[]>([]);
+    const [loyaltySearch, setLoyaltySearch] = useState('');
+    const [selectedLoyaltyCard, setSelectedLoyaltyCard] = useState<any | null>(null);
+
+    const fetchLoyaltyCards = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('loyalty_cards')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setLoyaltyCards(data || []);
+        } catch (error: any) {
+            console.error('Error fetching loyalty cards:', error);
+            showToast('Error al cargar clientes frecuentes: ' + error.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateStamps = async (id: string, newStamps: number) => {
+        if (newStamps < 0 || newStamps > 5) return;
+        setLoading(true);
+        try {
+            const { error } = await supabase
+                .from('loyalty_cards')
+                .update({ stamps: newStamps })
+                .eq('id', id);
+
+            if (error) throw error;
+            showToast('Sellos actualizados', 'success');
+            setLoyaltyCards(prev => prev.map(c => c.id === id ? { ...c, stamps: newStamps } : c));
+            if (selectedLoyaltyCard && selectedLoyaltyCard.id === id) {
+                setSelectedLoyaltyCard({ ...selectedLoyaltyCard, stamps: newStamps });
+            }
+        } catch (error: any) {
+            showToast('Error al actualizar sellos: ' + error.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteLoyaltyCard = async (id: string) => {
+        setShowConfirm({
+            show: true,
+            message: '¿Estás seguro de eliminar esta tarjeta de cliente frecuente? Esta acción no se puede deshacer.',
+            onConfirm: async () => {
+                setShowConfirm(null);
+                setLoading(true);
+                try {
+                    const { error } = await supabase
+                        .from('loyalty_cards')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                    showToast('Tarjeta eliminada con éxito', 'success');
+                    setLoyaltyCards(prev => prev.filter(c => c.id !== id));
+                    if (selectedLoyaltyCard && selectedLoyaltyCard.id === id) {
+                        setSelectedLoyaltyCard(null);
+                    }
+                } catch (error: any) {
+                    showToast('Error al eliminar tarjeta: ' + error.message, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        });
+    };
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchProducts();
+            fetchLoyaltyCards();
         }
     }, [isAuthenticated]);
 
@@ -77,13 +152,18 @@ export default function AdminPage() {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        let finalCategory = formData.category;
+        if (formData.name.toLowerCase().includes('van cleef') || formData.description.toLowerCase().includes('van cleef')) {
+            finalCategory = 'Van Cleef';
+        }
+
         if (isDropMode) {
             const newDraft = {
                 id: Math.random().toString(36).substr(2, 9),
                 name: formData.name,
                 price: parseFloat(formData.price),
                 description: formData.description,
-                category: formData.category,
+                category: finalCategory,
                 images: formData.images.split(',').map(url => url.trim()).filter(Boolean),
                 is_sold_out: false,
                 discount_price: formData.discountPrice ? parseFloat(formData.discountPrice) : null
@@ -105,7 +185,7 @@ export default function AdminPage() {
                         name: formData.name,
                         price: parseFloat(formData.price),
                         description: formData.description,
-                        category: formData.category,
+                        category: finalCategory,
                         images: formData.images.split(',').map(url => url.trim()),
                         is_sold_out: false,
                         discount_price: formData.discountPrice ? parseFloat(formData.discountPrice) : null
@@ -264,6 +344,12 @@ export default function AdminPage() {
         e.preventDefault();
         if (!editModal) return;
         setLoading(true);
+
+        let finalCategory = editFormData.category;
+        if (editFormData.name.toLowerCase().includes('van cleef') || editFormData.description.toLowerCase().includes('van cleef')) {
+            finalCategory = 'Van Cleef';
+        }
+
         try {
             const { error } = await supabase
                 .from('products')
@@ -271,7 +357,7 @@ export default function AdminPage() {
                     name: editFormData.name,
                     price: parseFloat(editFormData.price),
                     description: editFormData.description,
-                    category: editFormData.category,
+                    category: finalCategory,
                 })
                 .eq('id', editModal.product.id);
 
@@ -373,8 +459,34 @@ export default function AdminPage() {
                 </button>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="bg-white border-b border-gray-200 sticky top-[57px] z-20 flex justify-center">
+                <button
+                    onClick={() => setAdminTab('products')}
+                    className={`flex-1 max-w-xs py-3.5 text-xs font-bold uppercase tracking-widest text-center border-b-2 transition ${
+                        adminTab === 'products'
+                            ? 'border-black text-black font-black'
+                            : 'border-transparent text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                    🛍️ Productos
+                </button>
+                <button
+                    onClick={() => setAdminTab('loyalty')}
+                    className={`flex-1 max-w-xs py-3.5 text-xs font-bold uppercase tracking-widest text-center border-b-2 transition ${
+                        adminTab === 'loyalty'
+                            ? 'border-black text-black font-black'
+                            : 'border-transparent text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                    💳 Clientes Frecuentes
+                </button>
+            </div>
+
             <div className="max-w-2xl mx-auto p-4 space-y-8">
-                {/* Actions Toolbar - Drop Mode Toggle */}
+                {adminTab === 'products' ? (
+                    <>
+                        {/* Actions Toolbar - Drop Mode Toggle */}
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-gray-800">Modo Drop</p>
@@ -454,6 +566,7 @@ export default function AdminPage() {
                                     className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium text-gray-600 appearance-none bg-no-repeat"
                                 >
                                     <option value="Oversize">Oversize (Ropa)</option>
+                                    <option value="Boxy Fit">Boxy Fit (Ropa)</option>
                                     <option value="T-Shirts">T-Shirts (Ropa)</option>
                                     <option value="Pants">Pants (Ropa)</option>
                                     <option value="Hoodies">Hoodies (Ropa)</option>
@@ -678,6 +791,217 @@ export default function AdminPage() {
                         )}
                     </div>
                 </div>
+                </>
+                ) : (
+                <div className="space-y-6">
+                    {/* Search and summary */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4">
+                        <h2 className="text-lg font-bold text-gray-900 flex items-center justify-between">
+                            <span>Clientes Registrados</span>
+                            <span className="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-full font-mono">
+                                {loyaltyCards.length}
+                            </span>
+                        </h2>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Buscar cliente por nombre o apellido..."
+                                value={loyaltySearch}
+                                onChange={(e) => setLoyaltySearch(e.target.value)}
+                                className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-black focus:ring-1 focus:ring-black outline-none rounded-lg text-sm transition"
+                            />
+                            {loyaltySearch && (
+                                <button 
+                                    onClick={() => setLoyaltySearch('')}
+                                    className="absolute right-3 top-3 text-gray-400 hover:text-black font-bold"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Loyalty Cards List */}
+                    <div className="space-y-4">
+                        {loyaltyCards
+                            .filter(card => {
+                                const fullName = `${card.first_name} ${card.last_name}`.toLowerCase();
+                                return fullName.includes(loyaltySearch.toLowerCase());
+                            })
+                            .map(card => {
+                                const isSelected = selectedLoyaltyCard?.id === card.id;
+                                return (
+                                    <div 
+                                        key={card.id} 
+                                        className={`bg-white p-4 rounded-xl shadow-sm border transition-all ${
+                                            isSelected ? 'border-black ring-1 ring-black' : 'border-gray-100'
+                                        }`}
+                                    >
+                                        <div className="flex justify-between items-center gap-4 flex-wrap sm:flex-nowrap">
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="font-bold text-gray-900 truncate uppercase text-sm font-mono">
+                                                    {card.first_name} {card.last_name}
+                                                </h3>
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    {card.stamps} / 5 Sellos aplicados
+                                                </p>
+                                            </div>
+
+                                            <div className="flex gap-2 shrink-0 items-center">
+                                                <button
+                                                    onClick={() => handleUpdateStamps(card.id, card.stamps - 1)}
+                                                    disabled={card.stamps <= 0 || loading}
+                                                    className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-600 font-black hover:bg-gray-100 active:scale-90 transition disabled:opacity-50 flex items-center justify-center cursor-pointer"
+                                                >
+                                                    -
+                                                </button>
+                                                <button
+                                                    onClick={() => handleUpdateStamps(card.id, card.stamps + 1)}
+                                                    disabled={card.stamps >= 5 || loading}
+                                                    className="w-8 h-8 rounded-lg bg-[#C5FF30]/20 border border-[#C5FF30]/30 text-lime-700 font-black hover:bg-[#C5FF30]/30 active:scale-90 transition disabled:opacity-50 flex items-center justify-center cursor-pointer"
+                                                >
+                                                    +
+                                                </button>
+                                                <button
+                                                    onClick={() => handleUpdateStamps(card.id, 0)}
+                                                    disabled={card.stamps === 0 || loading}
+                                                    className="px-2.5 h-8 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-[10px] font-bold uppercase tracking-wider hover:bg-yellow-100 active:scale-90 transition disabled:opacity-50 cursor-pointer"
+                                                    title="Reiniciar a 0 sellos"
+                                                >
+                                                    Reset
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedLoyaltyCard(isSelected ? null : card)}
+                                                    className="px-3 h-8 rounded-lg bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider hover:bg-black active:scale-90 transition cursor-pointer"
+                                                >
+                                                    {isSelected ? 'Ocultar' : 'Ver'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteLoyaltyCard(card.id)}
+                                                    disabled={loading}
+                                                    className="w-8 h-8 rounded-lg bg-red-50 border border-red-100 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center active:scale-90 cursor-pointer"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Preview Virtual Card */}
+                                        {isSelected && (
+                                            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-center animate-fade-in bg-gray-50/50 p-4 rounded-xl">
+                                                <div className="relative w-full max-w-[400px] aspect-[1.609/1] bg-[#0D0D0F] rounded-3xl p-6 border border-zinc-800 flex flex-col justify-between overflow-hidden shadow-lg font-sans text-white">
+                                                    <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#C5FF30]/5 rounded-full blur-3xl pointer-events-none" />
+                                                    <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                                                    {/* Header */}
+                                                    <div className="flex justify-between items-center z-10">
+                                                        <span className="text-base font-black tracking-widest text-white uppercase">
+                                                            JD<span className="text-[#C5FF30]">.</span>Studio
+                                                        </span>
+                                                        <span className="text-[7px] font-mono font-bold tracking-[0.2em] border border-zinc-800 bg-zinc-900/50 text-zinc-400 px-2 py-1 rounded-full uppercase">
+                                                            Tarjeta Virtual
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Reward description */}
+                                                    <div className="text-center my-0.5 z-10">
+                                                        <p className="text-[8px] font-mono tracking-[0.18em] text-[#C5FF30] font-black uppercase">
+                                                            ✦ COMPRA 4 Y LA 5ª ES GRATIS ✦
+                                                        </p>
+                                                    </div>
+
+                                                    {/* 5 Stamp Circles */}
+                                                    <div className="flex justify-between items-center px-1 z-10">
+                                                        {[...Array(5)].map((_, idx) => {
+                                                            const stampsNum = typeof card.stamps === 'number' ? card.stamps : parseInt(card.stamps || '0');
+                                                            const isStamped = stampsNum > idx;
+                                                            const isSpecialThird = idx === 2;
+                                                            const isGiftFifth = idx === 4;
+
+                                                            return (
+                                                                <div
+                                                                    key={idx}
+                                                                    className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                                                        isGiftFifth 
+                                                                            ? isStamped 
+                                                                                ? 'border-2 border-dashed border-pink-500/60 bg-pink-950/20' 
+                                                                                : 'border-2 border-dashed border-red-500/40 bg-red-950/5'
+                                                                            : isSpecialThird
+                                                                                ? isStamped
+                                                                                    ? 'border-2 border-dashed border-yellow-500/60 bg-yellow-950/20'
+                                                                                    : 'border-2 border-dashed border-yellow-500/20 bg-yellow-950/5'
+                                                                                : isStamped
+                                                                                    ? 'border-2 border-dashed border-[#C5FF30]/60 bg-[#C5FF30]/10'
+                                                                                    : 'border border-dashed border-zinc-700/60 bg-zinc-900/30'
+                                                                    }`}
+                                                                >
+                                                                    {isStamped ? (
+                                                                        <motion.div
+                                                                            initial={{ scale: 0, rotate: -20 }}
+                                                                            animate={{ scale: 1, rotate: 0 }}
+                                                                            transition={{ type: 'spring', stiffness: 200, damping: 12 }}
+                                                                        >
+                                                                            {isGiftFifth ? (
+                                                                                <span className="text-lg">🎀</span>
+                                                                            ) : isSpecialThird ? (
+                                                                                <span className="text-lg filter drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">💎</span>
+                                                                            ) : (
+                                                                                <span className="text-lg text-cyan-400">💎</span>
+                                                                            )}
+                                                                        </motion.div>
+                                                                    ) : (
+                                                                        <span className={`text-[8px] font-mono font-bold ${
+                                                                            isGiftFifth
+                                                                                ? 'text-red-400/50'
+                                                                                : isSpecialThird
+                                                                                    ? 'text-yellow-500/50'
+                                                                                    : 'text-zinc-600'
+                                                                        }`}>
+                                                                            {isGiftFifth ? '🎁' : isSpecialThird ? '20%' : idx + 1}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <div className="flex justify-between items-end border-t border-zinc-900 pt-2 mt-0.5 z-10">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[7px] font-mono text-zinc-500 uppercase tracking-widest">Nombre:</span>
+                                                            <span className="text-[10px] font-bold text-zinc-200 border-b border-zinc-800/80 pb-0.5 min-w-[100px] uppercase font-mono truncate max-w-[160px]">
+                                                                {card.first_name} {card.last_name}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex flex-col text-right font-mono">
+                                                            <span className="text-[7px] text-zinc-500 uppercase tracking-wider">Turrialba, Cartago</span>
+                                                            <span className="text-[8px] text-[#C5FF30]/80 font-bold mt-0.5">@jdstudio.cr</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                        {loyaltyCards.length === 0 && (
+                            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+                                <p>No hay tarjetas de cliente frecuente registradas.</p>
+                            </div>
+                        )}
+
+                        {loyaltyCards.length > 0 && loyaltyCards.filter(card => {
+                            const fullName = `${card.first_name} ${card.last_name}`.toLowerCase();
+                            return fullName.includes(loyaltySearch.toLowerCase());
+                        }).length === 0 && (
+                            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+                                <p>No se encontraron clientes que coincidan con la búsqueda.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                )}
             </div>
 
             {/* Custom Notification Toast */}
@@ -805,6 +1129,7 @@ export default function AdminPage() {
                                     className="w-full p-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-black transition outline-none font-medium text-gray-600 appearance-none bg-no-repeat"
                                 >
                                     <option value="Oversize">Oversize (Ropa)</option>
+                                    <option value="Boxy Fit">Boxy Fit (Ropa)</option>
                                     <option value="T-Shirts">T-Shirts (Ropa)</option>
                                     <option value="Pants">Pants (Ropa)</option>
                                     <option value="Hoodies">Hoodies (Ropa)</option>

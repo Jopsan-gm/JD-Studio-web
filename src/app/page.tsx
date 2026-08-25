@@ -47,13 +47,47 @@ export default function Home() {
         fetchProducts();
     }, []);
 
+    useEffect(() => {
+        const fromProductPage = sessionStorage.getItem('fromProductPage');
+        if (fromProductPage === 'true') {
+            sessionStorage.removeItem('fromProductPage');
+            
+            const savedTab = sessionStorage.getItem('activeMainTab');
+            const savedCat = sessionStorage.getItem('activeCategory');
+            const savedShow = sessionStorage.getItem('showCatalog');
+
+            if (savedTab) {
+                setActiveMainTab(savedTab as any);
+            }
+            if (savedCat) {
+                setActiveCategory(savedCat);
+            }
+            if (savedShow === 'true') {
+                setShowCatalog(true);
+                setTimeout(() => {
+                    document.getElementById('catalogo-section')?.scrollIntoView({ behavior: 'auto' });
+                }, 250);
+            }
+        } else {
+            sessionStorage.removeItem('activeMainTab');
+            sessionStorage.removeItem('activeCategory');
+            sessionStorage.removeItem('showCatalog');
+        }
+    }, []);
+
+    useEffect(() => {
+        sessionStorage.setItem('activeMainTab', activeMainTab);
+        sessionStorage.setItem('activeCategory', activeCategory);
+        sessionStorage.setItem('showCatalog', showCatalog.toString());
+    }, [activeMainTab, activeCategory, showCatalog]);
+
     // Extract unique categories from products
     const categories: Category[] = Array.from(
         new Set(products.map((p) => p.category))
     ) as Category[];
 
     const joyeriaCategories: Category[] = ['Collares', 'Aretes', 'Pulseras', 'Anillos', 'Conjuntos', 'Van Cleef'];
-    const oversizeCategories: string[] = ['Oversize'];
+    const oversizeCategories: string[] = ['Oversize', 'Boxy Fit'];
     
     // Any clothing category that isn't jewelry and isn't oversize goes into Vintage
     const vintageCategories: string[] = Array.from(
@@ -63,11 +97,18 @@ export default function Home() {
     const getCategoriesForTab = (): string[] => {
         if (activeMainTab === 'Oversize') return oversizeCategories;
         if (activeMainTab === 'Vintage') return vintageCategories;
-        if (activeMainTab === 'Joyeria') return ['Piezas Individuales', 'Sets & Colecciones'];
+        if (activeMainTab === 'Joyeria') return ['JD MEN', 'Conjuntos', 'VAN CLEEF'];
         return categories;
     };
 
     const visibleCategories = getCategoriesForTab();
+
+    const isVanCleefProduct = (p: Product) => {
+        const nameMatch = p.name.toLowerCase().includes('van cleef');
+        const descMatch = p.description?.toLowerCase().includes('van cleef') || false;
+        const catMatch = p.category === 'Van Cleef';
+        return nameMatch || descMatch || catMatch;
+    };
 
     const filteredProducts = products.filter((p) => {
         if (activeMainTab === 'Oversize' && !oversizeCategories.includes(p.category)) return false;
@@ -75,19 +116,25 @@ export default function Home() {
         if (activeMainTab === 'Joyeria' && !joyeriaCategories.includes(p.category)) return false;
         
         if (activeCategory !== 'All') {
-            if (activeCategory === 'Piezas Individuales') {
+            if (activeCategory === 'JD MEN') {
                 if (!['Collares', 'Aretes', 'Pulseras', 'Anillos'].includes(p.category)) return false;
-            } else if (activeCategory === 'Sets & Colecciones') {
-                // Keep the 'Van Cleef' name check logic for Sets & Colecciones just in case
-                const isSet = ['Van Cleef', 'Conjuntos'].includes(p.category);
-                const nameMatch = p.name.toLowerCase().includes('van cleef');
-                const descMatch = p.description?.toLowerCase().includes('van cleef') || false;
-                if (!isSet && !nameMatch && !descMatch) return false;
+                if (isVanCleefProduct(p)) return false;
+            } else if (activeCategory === 'Conjuntos') {
+                if (p.category !== 'Conjuntos') return false;
+                if (isVanCleefProduct(p)) return false;
+            } else if (activeCategory === 'VAN CLEEF') {
+                if (!isVanCleefProduct(p)) return false;
             } else {
                 if (p.category !== activeCategory) return false;
             }
         }
         return true;
+    });
+
+    const sortedFilteredProducts = [...filteredProducts].sort((a, b) => {
+        const aSold = a.is_sold_out ? 1 : 0;
+        const bSold = b.is_sold_out ? 1 : 0;
+        return aSold - bSold;
     });
 
     const handleSelectCollection = (type: 'ropa' | 'joyeria') => {
@@ -173,7 +220,7 @@ export default function Home() {
                                 onCategoryChange={setActiveCategory}
                             />
 
-                            <ProductGrid products={filteredProducts} isLoading={loading} />
+                            <ProductGrid products={sortedFilteredProducts} isLoading={loading} />
                         </div>
                     </>
                 )}
