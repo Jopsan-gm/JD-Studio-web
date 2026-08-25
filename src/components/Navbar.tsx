@@ -5,16 +5,110 @@ import Link from 'next/link';
 import { ShoppingBag, X, Trash2, CreditCard, Truck, AlertTriangle, Info } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/utils/supabase';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isImportantOpen, setIsImportantOpen] = useState(false);
+    const [isLoyaltyOpen, setIsLoyaltyOpen] = useState(false);
+    const [loyaltyUser, setLoyaltyUser] = useState<any>(null);
+    const [loyaltyFirstName, setLoyaltyFirstName] = useState('');
+    const [loyaltyLastName, setLoyaltyLastName] = useState('');
+    const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+    const [loyaltyError, setLoyaltyError] = useState<string | null>(null);
     const { cart, removeFromCart } = useCart();
 
     const toggleMenu = () => setIsOpen(!isOpen);
     const toggleCart = () => setIsCartOpen(!isCartOpen);
+
+    const refreshLoyaltyCard = async (firstName: string, lastName: string) => {
+        setLoyaltyLoading(true);
+        setLoyaltyError(null);
+        try {
+            const { data, error } = await supabase
+                .from('loyalty_cards')
+                .select('*')
+                .eq('first_name', firstName.trim())
+                .eq('last_name', lastName.trim())
+                .maybeSingle();
+
+            if (error) throw error;
+
+            if (data) {
+                setLoyaltyUser(data);
+                localStorage.setItem('loyaltyUser', JSON.stringify({ first_name: data.first_name, last_name: data.last_name }));
+            } else {
+                setLoyaltyUser(null);
+                localStorage.removeItem('loyaltyUser');
+            }
+        } catch (err: any) {
+            console.error('Error fetching loyalty card:', err);
+            setLoyaltyError('No se pudo actualizar los sellos.');
+        } finally {
+            setLoyaltyLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const savedUser = localStorage.getItem('loyaltyUser');
+        if (savedUser) {
+            try {
+                const { first_name, last_name } = JSON.parse(savedUser);
+                refreshLoyaltyCard(first_name, last_name);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }, []);
+
+    const handleLoyaltyLookup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const fName = loyaltyFirstName.trim();
+        const lName = loyaltyLastName.trim();
+        if (!fName || !lName) {
+            setLoyaltyError('Por favor ingresa nombre y apellido');
+            return;
+        }
+
+        setLoyaltyLoading(true);
+        setLoyaltyError(null);
+
+        try {
+            const { data, error } = await supabase
+                .from('loyalty_cards')
+                .select('*')
+                .eq('first_name', fName)
+                .eq('last_name', lName)
+                .maybeSingle();
+
+            if (error) throw error;
+
+            if (data) {
+                setLoyaltyUser(data);
+                localStorage.setItem('loyaltyUser', JSON.stringify({ first_name: data.first_name, last_name: data.last_name }));
+            } else {
+                const { data: newData, error: insertError } = await supabase
+                    .from('loyalty_cards')
+                    .insert([{ first_name: fName, last_name: lName, stamps: 0 }])
+                    .select()
+                    .single();
+
+                if (insertError) throw insertError;
+
+                if (newData) {
+                    setLoyaltyUser(newData);
+                    localStorage.setItem('loyaltyUser', JSON.stringify({ first_name: newData.first_name, last_name: newData.last_name }));
+                }
+            }
+        } catch (err: any) {
+            console.error('Error in loyalty lookup:', err);
+            setLoyaltyError('Error al conectar con la base de datos.');
+        } finally {
+            setLoyaltyLoading(false);
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -222,6 +316,16 @@ const Navbar = () => {
                             Importante
                         </button>
 
+                        <button
+                            onClick={() => {
+                                toggleMenu();
+                                setIsLoyaltyOpen(true);
+                            }}
+                            className="text-xl font-serif font-bold hover:text-vintage-gold transition-colors text-left cursor-pointer"
+                        >
+                            Cliente Frecuente
+                        </button>
+
                         <div className="h-px bg-gray-100 my-2" />
 
                         <Link
@@ -377,6 +481,227 @@ const Navbar = () => {
                                     Entendido
                                 </button>
                             </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal de Cliente Frecuente */}
+            <AnimatePresence>
+                {isLoyaltyOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 pointer-events-none">
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsLoyaltyOpen(false)}
+                            className="fixed inset-0 bg-black/85 backdrop-blur-md pointer-events-auto"
+                        />
+
+                        {/* Modal Container */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
+                            className="relative bg-zinc-950 border border-white/10 rounded-2xl w-full max-w-lg overflow-y-auto shadow-2xl p-6 md:p-8 flex flex-col gap-6 text-white pointer-events-auto scrollbar-thin"
+                        >
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setIsLoyaltyOpen(false)}
+                                className="absolute top-4 right-4 p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white cursor-pointer animate-none"
+                                aria-label="Cerrar"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+
+                            {/* Header */}
+                            <div className="flex flex-col gap-2 border-b border-white/5 pb-4">
+                                <span className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.25em] text-[#C5FF30]">
+                                    Beneficios Exclusivos
+                                </span>
+                                <h3 className="text-2xl md:text-3xl font-serif font-black tracking-wide uppercase">
+                                    Cliente Frecuente
+                                </h3>
+                            </div>
+
+                            {/* Content */}
+                            {loyaltyUser ? (
+                                <div className="flex flex-col gap-6">
+                                    {/* Virtual Loyalty Card Display */}
+                                    <div className="relative w-full max-w-[440px] aspect-[1.609/1] bg-[#0D0D0F] rounded-3xl p-6 border border-zinc-800 flex flex-col justify-between overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)] font-sans mx-auto">
+                                        {/* Card background glowing elements */}
+                                        <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#C5FF30]/5 rounded-full blur-3xl pointer-events-none" />
+                                        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                                        {/* Header */}
+                                        <div className="flex justify-between items-center z-10">
+                                            <span className="text-lg font-black tracking-widest text-white font-sans uppercase">
+                                                JD<span className="text-[#C5FF30]">.</span>Studio
+                                            </span>
+                                            <span className="text-[8px] font-mono font-bold tracking-[0.2em] border border-zinc-800 bg-zinc-900/50 text-zinc-400 px-3 py-1.5 rounded-full uppercase">
+                                                Tarjeta Virtual
+                                            </span>
+                                        </div>
+
+                                        {/* Reward description */}
+                                        <div className="text-center my-1 z-10">
+                                            <p className="text-[8px] md:text-[9px] font-mono tracking-[0.18em] text-[#C5FF30] font-black uppercase">
+                                                ✦ COMPRA 4 Y LA 5ª ES GRATIS ✦
+                                            </p>
+                                        </div>
+
+                                        {/* 5 Stamp Circles */}
+                                        <div className="flex justify-between items-center px-2 z-10">
+                                            {[...Array(5)].map((_, idx) => {
+                                                const stampsNum = typeof loyaltyUser.stamps === 'number' ? loyaltyUser.stamps : parseInt(loyaltyUser.stamps || '0');
+                                                const isStamped = stampsNum > idx;
+                                                const isSpecialThird = idx === 2;
+                                                const isGiftFifth = idx === 4;
+
+                                                return (
+                                                    <div
+                                                        key={idx}
+                                                        className={`relative w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                                            isGiftFifth 
+                                                                ? isStamped 
+                                                                    ? 'border-2 border-dashed border-pink-500/60 bg-pink-950/20' 
+                                                                    : 'border-2 border-dashed border-red-500/40 bg-red-950/5'
+                                                                : isSpecialThird
+                                                                    ? isStamped
+                                                                        ? 'border-2 border-dashed border-yellow-500/60 bg-yellow-950/20'
+                                                                        : 'border-2 border-dashed border-yellow-500/20 bg-yellow-950/5'
+                                                                    : isStamped
+                                                                        ? 'border-2 border-dashed border-[#C5FF30]/60 bg-[#C5FF30]/10'
+                                                                        : 'border border-dashed border-zinc-700/60 bg-zinc-900/30'
+                                                        }`}
+                                                    >
+                                                        {isStamped ? (
+                                                            <motion.div
+                                                                initial={{ scale: 0, rotate: -20 }}
+                                                                animate={{ scale: 1, rotate: 0 }}
+                                                                transition={{ type: 'spring', stiffness: 200, damping: 12 }}
+                                                            >
+                                                                {isGiftFifth ? (
+                                                                    <span className="text-xl">🎀</span>
+                                                                ) : isSpecialThird ? (
+                                                                    <span className="text-xl filter drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">💎</span>
+                                                                ) : (
+                                                                    <span className="text-xl text-cyan-400">💎</span>
+                                                                )}
+                                                            </motion.div>
+                                                        ) : (
+                                                            <span className={`text-[9px] font-mono font-bold ${
+                                                                isGiftFifth
+                                                                    ? 'text-red-400/50'
+                                                                    : isSpecialThird
+                                                                        ? 'text-yellow-500/50'
+                                                                        : 'text-zinc-600'
+                                                            }`}>
+                                                                {isGiftFifth ? '🎁' : isSpecialThird ? '20%' : idx + 1}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="flex justify-between items-end border-t border-zinc-900 pt-3 mt-1 z-10">
+                                            <div className="flex flex-col">
+                                                <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest">Nombre:</span>
+                                                <span className="text-xs font-bold text-zinc-200 border-b border-zinc-800/80 pb-0.5 min-w-[120px] uppercase font-mono truncate max-w-[200px]">
+                                                    {loyaltyUser.first_name} {loyaltyUser.last_name}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col text-right font-mono">
+                                                <span className="text-[7px] md:text-[8px] text-zinc-500 uppercase tracking-wider">Turrialba, Cartago</span>
+                                                <span className="text-[8px] md:text-[9px] text-[#C5FF30]/80 font-bold mt-0.5">@jdstudio.cr</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Subtitle explaining stamps */}
+                                    <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 text-xs text-zinc-400 space-y-2 leading-relaxed">
+                                        <p>
+                                            <strong className="text-white">¿Cómo funciona?</strong> Cada compra te otorga un sello (administrado por el dueño de la tienda). 
+                                        </p>
+                                        <ul className="list-disc pl-4 space-y-1">
+                                            <li><strong className="text-yellow-500">3er sello (Compra 3):</strong> Obtienes un <strong className="text-white">20% de descuento</strong> en esa compra.</li>
+                                            <li><strong className="text-pink-400">5to sello (Compra 5):</strong> ¡Reclama un <strong className="text-white">accesorio GRATIS</strong>!</li>
+                                        </ul>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-3 justify-end items-center mt-2">
+                                        <button
+                                            onClick={() => refreshLoyaltyCard(loyaltyUser.first_name, loyaltyUser.last_name)}
+                                            disabled={loyaltyLoading}
+                                            className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold font-mono text-[10px] uppercase tracking-widest rounded-lg hover:bg-zinc-800 active:scale-95 transition-all disabled:opacity-50"
+                                        >
+                                            {loyaltyLoading ? 'Actualizando...' : '🔄 Refrescar'}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setLoyaltyUser(null);
+                                                localStorage.removeItem('loyaltyUser');
+                                                setLoyaltyFirstName('');
+                                                setLoyaltyLastName('');
+                                            }}
+                                            className="px-4 py-2 bg-red-950/20 border border-red-900/40 text-red-400 font-bold font-mono text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-950/40 active:scale-95 transition-all"
+                                        >
+                                            Buscar Otra
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleLoyaltyLookup} className="flex flex-col gap-4">
+                                    <p className="text-xs text-zinc-400 leading-relaxed mb-2">
+                                        Ingresa tu nombre y apellido para consultar tu tarjeta de cliente frecuente virtual. Si no tienes una registrada, la crearemos en este momento con 0 sellos.
+                                    </p>
+
+                                    {loyaltyError && (
+                                        <div className="bg-red-950/40 border border-red-900/50 rounded-lg p-3 text-red-400 text-xs flex gap-2 items-center">
+                                            <span>⚠️</span>
+                                            <p className="font-semibold">{loyaltyError}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Nombre</label>
+                                            <input
+                                                type="text"
+                                                value={loyaltyFirstName}
+                                                onChange={(e) => setLoyaltyFirstName(e.target.value)}
+                                                className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-[#C5FF30] text-sm text-white"
+                                                placeholder="Ej. Jopsan"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Apellido</label>
+                                            <input
+                                                type="text"
+                                                value={loyaltyLastName}
+                                                onChange={(e) => setLoyaltyLastName(e.target.value)}
+                                                className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-[#C5FF30] text-sm text-white"
+                                                placeholder="Ej. GM"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loyaltyLoading}
+                                        className="w-full py-4 bg-[#C5FF30] text-black font-bold font-mono text-xs uppercase tracking-widest rounded-lg hover:bg-white transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(197,255,48,0.2)] mt-4 disabled:opacity-50"
+                                    >
+                                        {loyaltyLoading ? 'Buscando...' : 'Ver Mi Tarjeta'}
+                                    </button>
+                                </form>
+                            )}
                         </motion.div>
                     </div>
                 )}

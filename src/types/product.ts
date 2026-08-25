@@ -1,4 +1,4 @@
-export type Category = 'Oversize' | 'T-Shirts' | 'Pants' | 'Hoodies' | 'Collares' | 'Aretes' | 'Pulseras' | 'Anillos' | 'Van Cleef' | 'Conjuntos';
+export type Category = 'Oversize' | 'Boxy Fit' | 'T-Shirts' | 'Pants' | 'Hoodies' | 'Collares' | 'Aretes' | 'Pulseras' | 'Anillos' | 'Van Cleef' | 'Conjuntos';
 
 export interface Product {
     id: string;

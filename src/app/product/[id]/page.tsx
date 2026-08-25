@@ -24,6 +24,10 @@ export default function ProductDetail() {
     const isLoved = product ? isInWishlist(product.id) : false;
 
     useEffect(() => {
+        sessionStorage.setItem('fromProductPage', 'true');
+    }, []);
+
+    useEffect(() => {
         if (!id) return;
 
         const fetchProduct = async () => {
